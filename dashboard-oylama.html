@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+        integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="style.css">
+    <title>Document</title>
+</head>
+
+<body>
+
+    <div class="login-panel" id="loginPanel">
+        <form id="loginForm">
+            <label for="mail">E-posta</label>
+            <input type="mail" id="mail" placeholder="E-posta">
+            <label for="password">Şifre</label>
+            <input type="password" id="password" placeholder="Şifre">
+            <button onclick="submit">Giriş Yap</button>
+        </form>
+    </div>
+    <div class="register-panel" id="registerPanel">
+        <form id="registerForm">
+            <label for="first_name">İsim:</label>
+            <input type="text" id="first_name" name="first_name" required>
+
+            <label for="last_name">Soyad:</label>
+            <input type="text" id="last_name" name="last_name" required>
+
+            <label for="mail">E-Posta:</label>
+            <input type="mail" id="mail" name="mail" required>
+
+            <label for="password">Şifre:</label>
+            <input type="password" id="password" name="password" required>
+
+            <label for="user_type">Kullanıcı Tipi:</label>
+            <select id="user_type" name="user_type" required>
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+            </select>
+
+            <button type="submit">Kayıt Ol</button>
+        </form>
+
+        <div class="message" id="message"></div>
+        <div class="error" id="error"></div>
+    </div>
+    <header class="header">
+        <a href="https://www.havelsan.com.tr" class="logo" target="_blank">
+            <img src="images/LOGO.PNG" alt="logo" />
+        </a>
+        <nav class="navbar">
+            <a href="/">Ana Sayfa</a>
+            <a href="dashboard-oylama.html" class="active">Yarışmalar</a>
+            <a href="dashboard-kullanicilar.html" >Kullanıcılar</a>
+        </nav>
+        <div class="buttons">
+            <button class="profile-btn" style="display:none;" onclick="toggleProfileMenu()">
+                <i class="fas fa-user"></i>
+            </button>
+            <div class="profile-menu" id="profileMenu"></div>
+
+            <!-- Login ve Register Butonları -->
+            <div class="auth-buttons" id="authButtons">
+                <button id="login" onclick="toggleLoginPanel()">Giriş Yap</button>
+                <button id="register" onclick="toggleRegisterPanel()">Kayıt Ol</button>
+            </div>
+        </div>
+    </header>
+    <div class="sidebar">
+        <h2>Sidebar Title</h2>
+        <div class="sidebar-sections">
+            <div id="sidebar-section1" class="sidebar-section1">
+                <input type="text" placeholder="Search Section 1..." class="search-box">
+                <button id="searchButton">Ara</button>
+            </div>
+            <div class="sidebar-section">
+                <input type="text" placeholder="Search Section 2..." class="search-box">
+            </div>
+            <div class="sidebar-section">
+                <input type="text" placeholder="Search Section 3..." class="search-box">
+            </div>
+            <div class="sidebar-section">
+                <input type="text" placeholder="Search Section 4..." class="search-box">
+            </div>
+        </div>
+    </div>
+    <div class="activity-section">
+        <button class="add-activity-btn" onclick="openModal()">
+            <i class="fa-solid fa-circle-plus" style="font-size: 300%;"></i>
+        </button>
+        <div class="activity-blocks" id="activityBlocks">
+            <!-- Modal structure -->
+            <div id="activityModal" class="modal">
+                <div class="modal-content">
+                    <span class="close-btn" onclick="closeModal()">&times;</span>
+                    <h2>Yeni Etkinlik Ekle</h2>
+                    <form id="activityForm" enctype="multipart/form-data">
+
+                        <label for="activityMail">Kullanıcı Maili:</label>
+                        <input type="email" id="activityMail" name="activityMail" required>
+
+                        <label for="activityTitle">Başlık:</label>
+                        <input type="text" id="activityTitle" name="activityTitle" required>
+
+                        <label for="activityDate">Tarih:</label>
+                        <input type="date" id="activityDate" name="activityDate" required>
+
+                        <label for="vote_type">Oylama Tipi:</label>
+                        <select id="vote_type" name="vote_type">
+                            <option value="Likert">Likert</option>
+                            <option value="Puan">Puan</option>
+                        </select>
+
+                        <label for="challenge_type">Oylama Tipi:</label>
+                        <select id="challenge_type" name="challenge_type">
+                            <option value="Bilimsel">Bilimsel</option>
+                            <option value="Endüstriyel">Endüstriyel</option>
+                            <option value="Akademik">Akademik</option>
+                        </select>
+
+                        <button type="button" onclick="addActivity()">Ekle</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        function toggleLoginPanel() {
+            const loginPanel = document.getElementById('loginPanel');
+            loginPanel.style.display = loginPanel.style.display === 'block' ? 'none' : 'block';
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // Formun varsayılan davranışını engelle
+
+            const mail = document.getElementById('mail').value;
+            const password = document.getElementById('password').value;
+
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ mail, password })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Kullanıcı bilgilerini localStorage'a kaydet
+                        localStorage.setItem('loggedInUser', JSON.stringify(data.user));
+
+                        // Dashboard'a yönlendir
+                        window.location.href = 'index.html';
+                    } else {
+                        // Giriş başarısız, hata mesajı göster
+                        alert('Giriş başarısız.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });
+
+        document.addEventListener('click', function (event) {
+            const loginPanel = document.getElementById('loginPanel');
+            const loginButton = document.getElementById('login');
+
+            if (!loginPanel.contains(event.target) && !loginButton.contains(event.target)) {
+                // Login panelinin dışına tıklandıysa paneli gizle
+                loginPanel.style.display = 'none';
+            }
+        });
+        
+        function toggleRegisterPanel() {
+            const registerPanel = document.getElementById('registerPanel');
+            registerPanel.style.display = registerPanel.style.display === 'block' ? 'none' : 'block';
+        }
+
+        document.getElementById('registerForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const formData = new FormData(this);
+            const jsonData = {};
+
+            formData.forEach((value, key) => {
+                jsonData[key] = value;
+            });
+
+            fetch('/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(jsonData)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const messageDiv = document.getElementById('message');
+                    const errorDiv = document.getElementById('error');
+
+                    if (data.success) {
+                        messageDiv.textContent = 'Hesap başarıyla oluşturuldu!';
+                        errorDiv.textContent = ''; // Hata mesajını temizle
+                    }
+                    else {
+                        errorDiv.textContent = 'Kayıt başarısız oldu. Lütfen tekrar deneyin.';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('error').textContent = 'Bir hata oluştu. Lütfen daha sonra tekrar deneyin.';
+                });
+        });
+
+        document.addEventListener('click', function (event) {
+            const registerPanel = document.getElementById('registerPanel');
+            const registerButton = document.getElementById('register');
+
+            if (!registerPanel.contains(event.target) && !registerButton.contains(event.target)) {
+                // Register panelinin dışına tıklandıysa paneli gizle
+                registerPanel.style.display = 'none';
+            }
+        });
+
+        function toggleProfileMenu() {
+            var menu = document.getElementById('profileMenu');
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+            updateProfileMenu();
+        }
+
+        function updateProfileMenu() {
+            var menu = document.getElementById('profileMenu');
+            var user = JSON.parse(localStorage.getItem('loggedInUser'));
+
+            if (user) {
+                // User is logged in
+                menu.innerHTML = `
+                    <div class="profile-header">
+                        <div class="profile-info">
+                            <h3>${user.first_name} ${user.last_name} <span class="user-type">(${user.user_type})</span></h3>
+                            <p>${user.mail}</p>
+                        </div>
+                    </div>
+                    <button class="account-settings-link" onclick="window.location.href='profile-settings.html'"> Account Settings </button>
+                    <button class="logout-btn" onclick="logout()"> Logout </button>
+                `;
+            } else {
+                menu.innerHTML = '';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('loggedInUser');
+            window.location.href = 'index.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const user = JSON.parse(localStorage.getItem('loggedInUser'));
+            const profileBtn = document.querySelector('.profile-btn');
+            const authButtons = document.getElementById('authButtons');
+
+            if (user) {
+                // Kullanıcı oturum açmışsa profil butonunu göster
+                profileBtn.style.display = 'block';
+                authButtons.style.display = 'none';
+            } else {
+                // Kullanıcı oturum açmamışsa giriş ve kayıt butonlarını göster
+                profileBtn.style.display = 'none';
+                authButtons.style.display = 'flex';
+            }
+        });
+    </script>
+    <script>
+        function addActivity() {
+            const mail = document.getElementById('activityMail').value
+            const title = document.getElementById('activityTitle').value
+            const date = document.getElementById('activityDate').value
+            const vote_type = document.getElementById('vote_type').value
+            const challenge_type = document.getElementById('challenge_type').value
+
+            if (title && date) {
+                const timestamp = Date.now();
+                const activityId = `${title.toLowerCase().replace(/\s+/g, '-')}-${timestamp}`;
+
+                // Create the activity HTML file on the server
+                fetch('/create-activity', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ mail, id: activityId, title, date, vote_type, challenge_type, html_id: `activity-${activityId}.html` })
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Error creating activity HTML file.');
+                        }
+                        return response.text();
+                    })
+                    .then(message => {
+                        console.log(message);
+                        // Add the activity block to the page
+                        const activitySection = document.querySelector('.activity-blocks');
+                        const newActivity = document.createElement('div');
+                        newActivity.className = 'activity-block';
+                        newActivity.dataset.id = activityId;
+                        newActivity.dataset.html = `activity-${activityId}.html`;
+                        newActivity.onclick = function () {
+                            window.location.href = `activity-${activityId}.html`;
+                        };
+
+                        const activityTitle = document.createElement('h3');
+                        activityTitle.textContent = title;
+
+                        newActivity.appendChild(activityTitle);
+
+                        const buttonsContainer = document.createElement('div');
+                        buttonsContainer.className = 'buttons-container';
+
+                        const deleteButton = document.createElement('button');
+                        deleteButton.className = 'delete-btn';
+                        deleteButton.textContent = 'X';
+                        deleteButton.onclick = function (event) {
+                            event.stopPropagation();
+                            deleteActivityBlock(newActivity);
+                        };
+
+                        const editButton = document.createElement('button');
+                        editButton.className = 'edit-btn';
+                        editButton.textContent = 'Edit';
+                        editButton.onclick = function (event) {
+                            event.stopPropagation();
+                            editActivityBlock(newActivity);
+                        };
+
+                        buttonsContainer.appendChild(editButton);
+                        buttonsContainer.appendChild(deleteButton);
+                        newActivity.appendChild(buttonsContainer);
+
+                        activitySection.appendChild(newActivity);
+                        closeModal();
+                        document.getElementById('activityForm').reset();
+                    })
+                    .catch(error => console.error('Error:', error));
+            } else {
+                alert('Başlık ve açıklama gereklidir.');
+            }
+            window.location.reload();
+        }
+
+        function deleteActivityBlock(element) {
+            const html_id = element; // Öğenin ID'sini al
+
+            // Öğeyi veritabanından sil
+            fetch(`/delete-activity/${html_id}`, {
+                method: 'DELETE'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Öğeyi sayfadan kaldır
+                        console.log('Öğe başarıyla silindi.');
+                    } else {
+                        console.error('Öğe silinirken bir hata oluştu:', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Sunucu hatası:', error);
+                });
+            window.location.reload();
+        }
+        
+        function openModal() {
+            document.getElementById('activityModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('activityModal').style.display = 'none';
+        }
+        
+        function editActivityBlock(dataid) {
+            const activity = document.querySelector(`[data-id="${dataid}"]`);
+            const title = prompt("Yeni başlığı girin:", activity.querySelector('h3').textContent);
+            const date = prompt("Yeni tarihi girin:", activity.querySelector('p').textContent.split(': ')[1]);
+
+            if (title) {
+                activity.querySelector('h3').textContent = title;
+            } else {
+                alert('Başlık gereklidir.');
+            }
+
+            // Öğeyi veritabanından sil
+            fetch(`/edit-activity/${dataid}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    title: title,
+                    date: date
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Öğeyi sayfadan kaldır
+                        console.log('Öğe başarıyla değiştirildi.');
+                    } else {
+                        console.error('Öğe silinirken bir hata oluştu:', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Sunucu hatası:', error);
+                });
+            window.location.reload();
+
+        }
+
+        function toggleProfileMenu() {
+            var menu = document.getElementById('profileMenu');
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+            updateProfileMenu();
+        }
+
+        function updateProfileMenu() {
+            var menu = document.getElementById('profileMenu');
+            var user = JSON.parse(localStorage.getItem('loggedInUser'));
+
+            if (user) {
+                // User is logged in
+                menu.innerHTML = `
+                    <div class="profile-header">
+                        <div class="profile-info">
+                            <h3>${user.first_name} ${user.last_name} <span class="user-type">(${user.user_type})</span></h3>
+                            <p>${user.mail}</p>
+                        </div>
+                    </div>
+                    <button class="account-settings-link" onclick="window.location.href='profile-settings.html'"> Account Settings </button>
+                    <button class="logout-btn" onclick="logout()"> Logout </button>
+                `;
+            } else {
+                menu.innerHTML = '';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('/activities')
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    const activitySection = document.querySelector('.activity-blocks');
+
+                    data.forEach(activity => {
+                        const activityBlock = document.createElement('div');
+                        activityBlock.className = 'activity-block';
+                        activityBlock.dataset.id = activity.data_id; // ID'yi data-id olarak ekle
+                        activityBlock.dataset.html = activity.html_id;
+                        const someElement = activity.html_id;
+                        activityBlock.addEventListener('click', () => {
+                            window.location.href = activityBlock.dataset.html; // Kullanıcıyı ilgili sayfaya yönlendirir
+                        });
+                        activityBlock.innerHTML = `
+                        
+                    <h3>${activity.title}</h3>
+                    <p>Date: ${activity.date}</p>
+                    <!-- Diğer gerekli aktiviteleri buraya ekleyin -->
+                    <button class="edit-btn" onclick="editActivityBlock('${activity.data_id}')">Düzenle</button>
+                    <button class="delete-btn" onclick="deleteActivityBlock('${someElement}')">Sil</button>
+                `;
+
+                        activitySection.appendChild(activityBlock);
+                    });
+                })
+                .catch(error => {
+                    console.error('Verileri alırken hata oluştu:', error);
+                });
+        });
+
+    </script>
+</body>
+
+</html>

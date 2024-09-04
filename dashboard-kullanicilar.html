@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+        integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="style.css">
+    <style>
+        html {
+            overflow: hidden;
+        }
+
+        main {
+            padding: 20px;
+        }
+
+        h1 {
+
+            /* Stick to the top of the page */
+            background-color: white;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+            text-align: center;
+            color: #333;
+
+            margin-bottom: -20px;
+            border: 1px solid black;
+        }
+
+        .table-container {
+            margin-top: 1%;
+            /* Adjust to the height of the fixed h1 */
+            height: 80vh;
+            /* Full viewport height minus the space for h1 */
+            overflow-y: scroll;
+            /* Enable scroll within the table */
+        }
+
+        table {
+            margin-top: 40px;
+            width: 100%;
+            background-color: white;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        th,
+        td {
+            border: 1px solid #3a3a3a;
+        }
+
+        th {
+            /* Adjust this value based on the height of the h1 */
+            background-color: white;
+            /* Ensure the header background stays visible */
+            z-index: 999;
+            /* Ensure it stays above other content */
+            background-color: #3a3a3a;
+            color: white;
+        }
+
+        thead th {
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+
+        tr:nth-child(even) {
+            background-color: #bebdbd;
+        }
+
+        .admin-column .btn-group .btn {
+            background-color: white;
+            color: black;
+            border: 1px solid black;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .admin-column .btn-group .btn:hover {
+            background-color: #0e7708;
+        }
+
+        .admin-column .btn.selected {
+            background-color: #11900a;
+            color: white;
+            border-color: black;
+        }
+
+        .admin-column .btn:not(.selected):hover {
+            background-color: #11900a;
+        }
+    </style>
+    <title>Document</title>
+</head>
+
+<body>
+
+    <div class="login-panel" id="loginPanel">
+        <form id="loginForm">
+            <label for="mail">E-posta</label>
+            <input type="mail" id="mail" placeholder="E-posta">
+            <label for="password">Şifre</label>
+            <input type="password" id="password" placeholder="Şifre">
+            <button onclick="submit">Giriş Yap</button>
+        </form>
+    </div>
+    <div class="register-panel" id="registerPanel">
+        <form id="registerForm">
+            <label for="first_name">İsim:</label>
+            <input type="text" id="first_name" name="first_name" required>
+
+            <label for="last_name">Soyad:</label>
+            <input type="text" id="last_name" name="last_name" required>
+
+            <label for="mail">E-Posta:</label>
+            <input type="mail" id="mail" name="mail" required>
+
+            <label for="password">Şifre:</label>
+            <input type="password" id="password" name="password" required>
+
+            <label for="user_type">Kullanıcı Tipi:</label>
+            <select id="user_type" name="user_type" required>
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+            </select>
+
+            <button type="submit">Kayıt Ol</button>
+        </form>
+
+        <div class="message" id="message"></div>
+        <div class="error" id="error"></div>
+    </div>
+    <header class="header">
+        <a href="https://www.havelsan.com.tr" class="logo" target="_blank">
+            <img src="images/LOGO.PNG" alt="logo" />
+        </a>
+        <nav class="navbar">
+            <a href="/">Ana Sayfa</a>
+            <a href="dashboard-oylama.html">Yarışmalar</a>
+            <a href="dashboard-kullanicilar.html" class="active">Kullanıcılar</a>
+        </nav>
+        <div class="buttons">
+            <button class="profile-btn" style="display:none;" onclick="toggleProfileMenu()">
+                <i class="fas fa-user"></i>
+            </button>
+            <div class="profile-menu" id="profileMenu"></div>
+
+            <!-- Login ve Register Butonları -->
+            <div class="auth-buttons" id="authButtons">
+                <button id="login" onclick="toggleLoginPanel()">Giriş Yap</button>
+                <button id="register" onclick="toggleRegisterPanel()">Kayıt Ol</button>
+            </div>
+        </div>
+    </header>
+    <main>
+        <h1>Kullanıcılar</h1>
+        <div class="table-container">
+            <table id="usersTable">
+                <thead id="tableHeaders">
+                </thead>
+                <tbody>
+                    <!-- Rows will be inserted here by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+    <script src="functions.js"></script>
+    <script src="users.js"></script>
+    <script>
+        var user = JSON.parse(localStorage.getItem('loggedInUser'));
+        function renderHeaders() {
+            const tableHeaders = document.getElementById('tableHeaders');
+            if (user && user.user_type === 'Admin') {
+                headerHTML = `
+                <tr>
+                    <th style="position: fixed; top: 18.5%; left:1.8%; width:  2.5%;" id="id">ID</th>
+                    <th style="position: fixed; top: 18.5%; left:5%; width: 8%;" id="ad">Ad</th>
+                    <th style="position: fixed; top: 18.5%; left:13%; width: 8%;" id="soyad">Soyad</th>
+                    <th style="position: fixed; top: 18.5%; left:22%; width: 34%;" id="email">Email</th>
+                    <th style="position: fixed; top: 18.5%; left:55%; width: 42.1%;" id='admin-column' class="admin-column">Rol</th>
+                </tr>    
+                `
+            } else {
+                headerHTML = `
+                <tr>
+                <th style="position: fixed; top: 18.5% ; left:1.8%; width:  5%;">ID</th>
+                <th style="position: fixed; top: 18.5% ; left:7%; width: 15%;">Ad</th>
+                <th style="position: fixed; top: 18.5% ; left:20%; width: 17.5%;">Soyad</th>
+                <th style="position: fixed; top: 18.5% ; left:36%; width: 61.1%;">Email</th>
+                <th style="position: fixed; top: 18.5% ; left:70%; width: 42.1%;" id='admin-column' class="admin-column hidden">Rol</th>
+                </tr>
+            `}
+            tableHeaders.innerHTML = headerHTML;
+        }
+        renderHeaders()
+        login()
+        loginpanel()
+        register()
+        registerpanel()
+        loggeduser()
+    </script>
+</body>
+
+</html>
